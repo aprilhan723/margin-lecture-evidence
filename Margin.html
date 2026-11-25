@@ -1,0 +1,139 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Margin / Study evidence finder</title>
+<style>
+:root{font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;color:#192720;background:#f8f7f1;--green:#204e40;--light:#dcebdc;--line:#c8d0c3}
+*{box-sizing:border-box} body{margin:0} header{border-bottom:1px solid var(--line);padding:15px max(5vw,20px);display:flex;align-items:center;gap:10px;color:var(--green);font-size:20px}header b{font-family:Georgia,serif;font-size:26px} .brand{width:24px;height:24px;background:repeating-linear-gradient(90deg,#244d3d 0 3px,transparent 3px 7px);transform:skew(-12deg)}
+main{max-width:1200px;margin:auto;padding:30px max(4vw,18px) 65px}h1{font:normal clamp(33px,5vw,62px)/1.06 Georgia,serif;max-width:850px;margin:10px 0 12px;letter-spacing:-.045em} h2{font:normal 27px/1.25 Georgia,serif;margin:0 0 12px}.intro{max-width:700px;font-size:16px;line-height:1.5;margin:0 0 25px;color:#3c5048}.layout{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);gap:32px;padding-top:23px}.group{display:flex;justify-content:space-between;align-items:baseline;gap:12px}.note{font-size:13px;color:#43554b}.field{border:1px solid #a5b3a6;background:#fffef9;border-radius:7px;padding:13px;display:block;width:100%;font:15px/1.55 ui-monospace,monospace;resize:vertical;color:inherit}#notes{min-height:290px}#claim{min-height:85px}.links{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.links button,.ghost{background:transparent;border:1px solid var(--line);border-radius:20px;padding:6px 10px;color:var(--green);font:inherit;font-size:13px;cursor:pointer}.primary{border:0;border-radius:6px;background:var(--green);color:white;padding:12px 18px;font-weight:650;font-size:15px;cursor:pointer}.row{display:flex;align-items:center;gap:12px;margin-top:10px}.status{font-size:14px}.results{margin-top:25px;border-top:1px solid var(--line);padding-top:14px}.results h3{font-size:17px;margin:4px 0 10px}.card{padding:12px 0;border-top:1px solid var(--line)}.line{display:grid;grid-template-columns:25px 1fr;gap:7px;margin:5px 0;font:15px/1.5 Georgia,serif}.num{color:#52665b;font:12px/1.8 ui-monospace,monospace;text-align:right}.flag{margin:8px 0;color:#834018;font-size:14px;line-height:1.4}.ref{font:600 13px/1.5 ui-monospace,monospace;color:var(--green)}button:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid #ad7100;outline-offset:3px}.outside{margin-top:14px}.meter{color:#536558}.error{color:#8c2922} @media(max-width:745px){.layout{grid-template-columns:1fr;gap:24px}#notes{min-height:155px}}
+</style>
+<header><span class="brand" aria-hidden="true"></span><b>Margin</b></header>
+<main><h1>Where did that quiz claim come from?</h1><p class="intro">Find the lines to reread in your English notes. Compare the exact passage with the claim before deciding what the notes support. Your text stays in this browser tab.</p>
+<div class="layout">
+<section><div class="group"><h2><label for="notes">Source notes</label></h2><button class="ghost" id="reset">Load example</button></div>
+<textarea class="field" id="notes" maxlength="60000" spellcheck="false" aria-describedby="note-help"></textarea><p class="note" id="note-help">Paste up to 60,000 characters of plain text. Blank lines separate passages. Citations count from the first line.</p></section>
+<section><h2><label for="claim">Quiz claim</label></h2><textarea id="claim" class="field" maxlength="800" placeholder="Enter one statement in English."></textarea><div class="links" id="examples" aria-label="Sample claims"></div>
+<div class="row"><button class="primary" id="find">Find evidence</button><span aria-live="polite" class="status" id="status"></span></div>
+<div id="results" class="results" hidden></div></section></div></main>
+<script>(function(root) {
+  "use strict";
+  const STOP = new Set("a an the it of on in to from for there with as than at is are was were be been had has have does did do by before after this that its their but and or when even into one which while during per".split(" "));
+  const ALIASES = new Map();
+  for (const group of ["increase increased increases increasing higher rose larger greater", "decrease decreased decreases decreasing lower fell smaller reduced", "unchanged stable identical equal", "double doubles doubled twice twofold", "trial trials", "repeat repeats repeated replicate replicates", "sample samples sampled", "median medians", "average averages mean means", "delay delays latency", "temperature temperatures", "voltage voltages", "sensor sensors", "queue queues", "battery batteries", "lamp lamps", "no none not never", "always every all invariably", "sometimes occasionally some may might could", "initial beginning start", "final ending end"]) {
+    const words = group.split(" ");
+    for (const word of words) ALIASES.set(word, words[0]);
+  }
+  function tokens(text) {
+    const words = text.toLowerCase().normalize("NFKC").match(/[\p{L}]+|\d+(?:\.\d+)?/gu) || [];
+    return words.filter(w => !STOP.has(w)).map(w => ALIASES.get(w) || w);
+  }
+  function passages(text) {
+    const lines = text.replace(/\r\n?/g, "\n").split("\n");
+    const spans = [];
+    for (let i = 0; i < lines.length;) {
+      if (!lines[i].trim()) { i++; continue; }
+      const start = i;
+      while (i < lines.length && lines[i].trim()) i++;
+      const length = i - start;
+      for (let j = start; j < i; j += 2) {
+        const end = Math.min(i, j + 3);
+        spans.push({start: j + 1, end, text: lines.slice(j, end).join("\n")});
+        if (end === i || length <= 3) break;
+      }
+    }
+    return spans;
+  }
+  function quantities(text) {
+    const regex = /(?<![\w.])(\d+(?:\.\d+)?)\s*(milliseconds?|seconds?|minutes?|hours?|volts?|watts?|degrees?|ms\b|s\b|v\b|w\b|%)/gi;
+    const units = {ms: ["s", .001], millisecond:["s",.001], s:["s",1], second:["s",1], minute:["s",60], hour:["s",3600], volt:["v",1], v:["v",1], watt:["w",1], w:["w",1], degree:["degree",1], "%":["%",1]};
+    return Array.from(text.matchAll(regex), hit => {
+      const raw = hit[2].toLowerCase();
+      const key = units[raw] ? raw : raw.replace(/s$/, "");
+      const [dimension, factor] = units[key];
+      return [dimension, Number(hit[1])*factor];
+    });
+  }
+  function conflicts(query, text, q, d) {
+    const reasons = [];
+    if (q.has("always") && !d.has("always")) reasons.push("The claim uses universal wording that this passage does not establish.");
+    const textNeg = d.has("no"), queryNeg = q.has("no");
+    if (textNeg !== queryNeg) reasons.push("The claim and passage use different negation. Check what each negation modifies.");
+    if ((q.has("increase") && d.has("decrease") && !d.has("increase")) || (q.has("decrease") && d.has("increase") && !d.has("decrease")))
+      reasons.push("The directions of change differ.");
+    const facts = quantities(text);
+    for (const [dimension, value] of quantities(query)) {
+      if (!facts.some(([u,n]) => u === dimension && Math.abs(n - value) < 1e-8)) {
+        reasons.push("A stated quantity or unit is missing or different in the passage."); break;
+      }
+    }
+    if (q.has("average") && d.has("median") && !d.has("average") || q.has("median") && d.has("average") && !d.has("median"))
+      reasons.push("The claim and passage name different summary statistics.");
+    return reasons;
+  }
+  function search(source, query) {
+    const docs = passages(source);
+    const q = new Set(tokens(query));
+    const docTerms = docs.map(doc => new Set(tokens(doc.text)));
+    const weights = new Map([...q].map(term => [term, 1 + Math.log((1 + docs.length) / (1 + docTerms.filter(doc => doc.has(term)).length))]));
+    const total = [...weights.values()].reduce((a,b) => a+b,0) || 1;
+    const rows = docs.map((doc,i) => {
+      const d = docTerms[i];
+      const sentences = doc.text.split(/(?:\n+|(?<=[.!?])\s+)/).filter(Boolean);
+      let anchor = doc.text;
+      let anchorCoverage = -1;
+      for (const sentence of sentences) {
+        const terms = new Set(tokens(sentence));
+        const coverage = [...q].reduce((sum,term) => sum + (terms.has(term) ? weights.get(term) : 0), 0);
+        if (coverage > anchorCoverage) { anchor = sentence; anchorCoverage = coverage; }
+      }
+      const shared = [...q].filter(term => d.has(term));
+      const covered = shared.reduce((s,t) => s + weights.get(t),0) / total;
+      const score = covered * (.91 + .09 * shared.length / Math.max(d.size,1));
+      return {...doc, score, covered, matches:shared, reasons:conflicts(query, anchor, q, new Set(tokens(anchor)))};
+    }).sort((a,b) => b.score-a.score || a.start-b.start);
+    const top = rows[0];
+    // A few shared topic words can point to a passage even when the claim's
+    // distinguishing concepts are missing from the entire source.
+    const unseen = [...q].filter(term => !docTerms.some(terms => terms.has(term))).length;
+    const noveltyMismatch = top && unseen >= 2 && unseen / q.size >= .30 && top.covered < .55;
+    if (noveltyMismatch || !top || top.matches.length < 2 || top.covered < .39) return {status:"abstain", rows:[]};
+    const candidates = rows.filter(r => r.matches.length >= 2 && r.covered >= .39);
+    const tied = candidates.some(r => (r.end < top.start || r.start > top.end) && top.score-r.score <= .025);
+    return {status:tied ? "ambiguous" : top.reasons.length ? "check" : "candidate", rows:candidates.slice(0,3)};
+  }
+  function baseline(source, query) {
+    const raw = text => new Set(text.toLowerCase().match(/[a-z]+|\d+/g) || []);
+    const q = raw(query);
+    return passages(source).map(doc => {
+      const terms = raw(doc.text);
+      return {...doc, value:[...q].filter(w => terms.has(w)).length};
+    }).sort((a,b) => b.value-a.value || a.start-b.start)[0];
+  }
+  const api = {passages,search,baseline};
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  else root.MarginEvidence = api;
+})(globalThis);
+</script>
+<script>
+const sample={"source": "The workshop compared two settings on the same classroom lamp.\nThe initial run used the default setting for all trials.\n\nFor the lamp sensor, the median delay decreased from 20 ms to 12 ms.\nThe team did not record a mean delay.\n\nIn a separate battery trial, the final voltage stayed stable at 3 volts.\nThe battery trial measured voltage at the terminals.\n\nThe library queue sometimes grew during the afternoon.\nObservations covered two weekdays and excluded holidays.\n\nA blue filter doubled the exposure time in the camera trial.\nThe camera stayed in the same position for both settings.", "queries": [["Find a passage", "The lamp sensor's median latency fell to 12 milliseconds."], ["Check a quantity", "The final battery voltage was 5 volts."], ["Try an unsupported claim", "Rainfall predicted the price of train tickets."]]};
+const notes=document.querySelector("#notes"),claim=document.querySelector("#claim"),statusEl=document.querySelector("#status"),results=document.querySelector("#results");
+function el(tag,cls,txt){const node=document.createElement(tag);node.className=cls;node.textContent=txt;return node;}
+function clearResult(){results.replaceChildren();results.hidden=true;statusEl.textContent="";}
+function render(){
+  clearResult();if(!notes.value.trim()||!claim.value.trim()){statusEl.textContent="Enter both notes and a claim.";return;}
+  const match=MarginEvidence.search(notes.value,claim.value);results.hidden=false;
+  if(match.status==="abstain"){results.append(el("h3","","No clear passage found"),el("p","note","The notes may use different wording or may omit the claim. Try a distinctive term from the lecture."));statusEl.textContent="Search complete.";return;}
+  results.append(el("h3","",match.status==="ambiguous"?"Multiple passages fit; compare them":match.status==="check"?"Check the wording":"Passage candidates"));
+  for(const entry of match.rows){
+    const item=el("article","card","");item.append(el("div","ref",entry.start===entry.end?"Line "+entry.start:"Lines "+entry.start+"–"+entry.end));
+    entry.text.split("\n").forEach((line,i)=>{const p=el("div","line","");p.append(el("span","num",String(i+entry.start)),el("span","",line));item.append(p);});
+    for(const warning of entry.reasons)item.append(el("p","flag",warning));
+    results.append(item);
+  }
+  statusEl.textContent=match.rows.length+" passage"+(match.rows.length===1?"":"s")+" found.";
+}
+function setSample(index){notes.value=sample.source;claim.value=sample.queries[index][1];render();}
+sample.queries.forEach(([label],index)=>{const b=el("button","",label);b.onclick=()=>setSample(index);document.querySelector("#examples").append(b);});
+document.querySelector("#reset").onclick=()=>setSample(0);
+document.querySelector("#find").onclick=render;notes.oninput=clearResult;claim.oninput=clearResult;
+claim.onkeydown=e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter")render();};
+setSample(0);
+</script></html>

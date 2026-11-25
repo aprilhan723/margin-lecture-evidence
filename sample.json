@@ -1,0 +1,8 @@
+{
+  "source": "The workshop compared two settings on the same classroom lamp.\nThe initial run used the default setting for all trials.\n\nFor the lamp sensor, the median delay decreased from 20 ms to 12 ms.\nThe team did not record a mean delay.\n\nIn a separate battery trial, the final voltage stayed stable at 3 volts.\nThe battery trial measured voltage at the terminals.\n\nThe library queue sometimes grew during the afternoon.\nObservations covered two weekdays and excluded holidays.\n\nA blue filter doubled the exposure time in the camera trial.\nThe camera stayed in the same position for both settings.",
+  "queries": [
+    ["Find a passage", "The lamp sensor's median latency fell to 12 milliseconds."],
+    ["Check a quantity", "The final battery voltage was 5 volts."],
+    ["Try an unsupported claim", "Rainfall predicted the price of train tickets."]
+  ]
+}

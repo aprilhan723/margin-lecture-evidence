@@ -1,0 +1,236 @@
+{
+  "holdoutResults": [
+    {
+      "claim": "The green lamp measured vehicle traffic outside campus.",
+      "expectedLine": null,
+      "actualLine": null,
+      "expectedStatus": "abstain",
+      "actualStatus": "abstain",
+      "pass": true
+    },
+    {
+      "claim": "A narrow filter made circuit latency higher at 500 milliseconds.",
+      "expectedLine": 4,
+      "actualLine": 4,
+      "expectedStatus": "candidate",
+      "actualStatus": "candidate",
+      "pass": true
+    }
+  ],
+  "scope": "Hand-authored English synthetic examples with expected labels, created during development. Internal fixtures only; zero study participants. Baseline always returns one literal token-overlap match.",
+  "summary": {
+    "fixtureQueries": 21,
+    "related": 13,
+    "unsupported": 8,
+    "top1Correct": 13,
+    "lexicalBaselineTop1Correct": 13,
+    "relatedCoverage": 13,
+    "unsupportedWithCitation": 0,
+    "lexicalBaselineUnsupportedWithCitation": 8,
+    "warningCount": 5,
+    "warningsDetected": 5,
+    "statusCorrect": 21
+  },
+  "guards": [
+    "remove the unique source and abstain",
+    "shift quote line numbers after inserting a heading and a blank",
+    "do not interpret negation from an unrelated sentence",
+    "detect a quantity mismatch",
+    "distinguish units from matching numerals",
+    "report two equally plausible sources",
+    "handle CRLF and preserve exact quotes",
+    "empty input abstains",
+    "blank document abstains"
+  ],
+  "results": [
+    {
+      "corpus": "classroom",
+      "claim": "The lamp sensor's median latency fell to 12 milliseconds.",
+      "expectedLine": 4,
+      "expectedStatus": "candidate",
+      "actualLine": 4,
+      "actualStatus": "candidate",
+      "baselineLine": 4
+    },
+    {
+      "corpus": "classroom",
+      "claim": "The final battery voltage was unchanged at 3 V.",
+      "expectedLine": 7,
+      "expectedStatus": "candidate",
+      "actualLine": 7,
+      "actualStatus": "candidate",
+      "baselineLine": 7
+    },
+    {
+      "corpus": "classroom",
+      "claim": "The library queue grew on some afternoons.",
+      "expectedLine": 10,
+      "expectedStatus": "candidate",
+      "actualLine": 10,
+      "actualStatus": "candidate",
+      "baselineLine": 10
+    },
+    {
+      "corpus": "classroom",
+      "claim": "A blue filter doubled the camera exposure time.",
+      "expectedLine": 13,
+      "expectedStatus": "candidate",
+      "actualLine": 13,
+      "actualStatus": "candidate",
+      "baselineLine": 13
+    },
+    {
+      "corpus": "classroom",
+      "claim": "The battery measured 5 volts in the final trial.",
+      "expectedLine": 7,
+      "expectedStatus": "check",
+      "actualLine": 7,
+      "actualStatus": "check",
+      "baselineLine": 7
+    },
+    {
+      "corpus": "classroom",
+      "claim": "The library queue always grew during the afternoon.",
+      "expectedLine": 10,
+      "expectedStatus": "check",
+      "actualLine": 10,
+      "actualStatus": "check",
+      "baselineLine": 10
+    },
+    {
+      "corpus": "classroom",
+      "claim": "Rainfall predicted the price of train tickets.",
+      "expectedLine": null,
+      "expectedStatus": "abstain",
+      "actualLine": null,
+      "actualStatus": "abstain",
+      "baselineLine": 1
+    },
+    {
+      "corpus": "classroom",
+      "claim": "Sandstone erosion produced fine red sediment.",
+      "expectedLine": null,
+      "expectedStatus": "abstain",
+      "actualLine": null,
+      "actualStatus": "abstain",
+      "baselineLine": 1
+    },
+    {
+      "corpus": "classroom",
+      "claim": "The library queue predicted battery voltage.",
+      "expectedLine": null,
+      "expectedStatus": "abstain",
+      "actualLine": null,
+      "actualStatus": "abstain",
+      "baselineLine": 7
+    },
+    {
+      "corpus": "classroom",
+      "claim": "The lamp sensor identified the address of the library.",
+      "expectedLine": null,
+      "expectedStatus": "abstain",
+      "actualLine": null,
+      "actualStatus": "abstain",
+      "baselineLine": 4
+    },
+    {
+      "corpus": "classroom",
+      "claim": "Camera exposure determined the afternoon queue length.",
+      "expectedLine": null,
+      "expectedStatus": "abstain",
+      "actualLine": null,
+      "actualStatus": "abstain",
+      "baselineLine": 10
+    },
+    {
+      "corpus": "classroom",
+      "claim": "The battery trial measured electricity prices in Seoul.",
+      "expectedLine": null,
+      "expectedStatus": "abstain",
+      "actualLine": null,
+      "actualStatus": "abstain",
+      "baselineLine": 7
+    },
+    {
+      "corpus": "signals",
+      "claim": "With a narrow filter, circuit latency rose to 500 milliseconds.",
+      "expectedLine": 4,
+      "expectedStatus": "candidate",
+      "actualLine": 4,
+      "actualStatus": "candidate",
+      "baselineLine": 4
+    },
+    {
+      "corpus": "signals",
+      "claim": "The green lamp used 6 watts.",
+      "expectedLine": 7,
+      "expectedStatus": "candidate",
+      "actualLine": 7,
+      "actualStatus": "candidate",
+      "baselineLine": 7
+    },
+    {
+      "corpus": "signals",
+      "claim": "The morning group's average grade appears in the survey.",
+      "expectedLine": 13,
+      "expectedStatus": "candidate",
+      "actualLine": 13,
+      "actualStatus": "candidate",
+      "baselineLine": 13
+    },
+    {
+      "corpus": "signals",
+      "claim": "The calibration table gives the median current.",
+      "expectedLine": 10,
+      "expectedStatus": "candidate",
+      "actualLine": 10,
+      "actualStatus": "candidate",
+      "baselineLine": 10
+    },
+    {
+      "corpus": "signals",
+      "claim": "The circuit delay decreased with the narrow filter.",
+      "expectedLine": 4,
+      "expectedStatus": "check",
+      "actualLine": 4,
+      "actualStatus": "check",
+      "baselineLine": 4
+    },
+    {
+      "corpus": "signals",
+      "claim": "The green lamp used 6 volts.",
+      "expectedLine": 7,
+      "expectedStatus": "check",
+      "actualLine": 7,
+      "actualStatus": "check",
+      "baselineLine": 7
+    },
+    {
+      "corpus": "signals",
+      "claim": "The green lamp did not use 6 watts.",
+      "expectedLine": 7,
+      "expectedStatus": "check",
+      "actualLine": 7,
+      "actualStatus": "check",
+      "baselineLine": 7
+    },
+    {
+      "corpus": "signals",
+      "claim": "Kitchen ovens baked wholegrain rye bread.",
+      "expectedLine": null,
+      "expectedStatus": "abstain",
+      "actualLine": null,
+      "actualStatus": "abstain",
+      "baselineLine": 1
+    },
+    {
+      "corpus": "signals",
+      "claim": "The orbit crossed Saturn's rings.",
+      "expectedLine": null,
+      "expectedStatus": "abstain",
+      "actualLine": null,
+      "actualStatus": "abstain",
+      "baselineLine": 1
+    }
+  ]
+}
