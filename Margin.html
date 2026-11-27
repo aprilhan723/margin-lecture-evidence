@@ -42,13 +42,13 @@ main{max-width:1200px;margin:auto;padding:30px max(4vw,18px) 65px}h1{font:normal
     return spans;
   }
   function quantities(text) {
-    const regex = /(?<![\w.])(\d+(?:\.\d+)?)\s*(milliseconds?|seconds?|minutes?|hours?|volts?|watts?|degrees?|ms\b|s\b|v\b|w\b|%)/gi;
+    const regex = /(?<![\w.])([+−-]?(?:\d+(?:\.\d+)?|\.\d+))\s*((?:milliseconds?|seconds?|minutes?|hours?|volts?|watts?|degrees?|ms|s|v|w)\b|%)/gi;
     const units = {ms: ["s", .001], millisecond:["s",.001], s:["s",1], second:["s",1], minute:["s",60], hour:["s",3600], volt:["v",1], v:["v",1], watt:["w",1], w:["w",1], degree:["degree",1], "%":["%",1]};
     return Array.from(text.matchAll(regex), hit => {
       const raw = hit[2].toLowerCase();
       const key = units[raw] ? raw : raw.replace(/s$/, "");
       const [dimension, factor] = units[key];
-      return [dimension, Number(hit[1])*factor];
+      return [dimension, Number(hit[1].replace("−", "-"))*factor];
     });
   }
   function conflicts(query, text, q, d) {
@@ -130,7 +130,12 @@ function render(){
   }
   statusEl.textContent=match.rows.length+" passage"+(match.rows.length===1?"":"s")+" found.";
 }
-function setSample(index){notes.value=sample.source;claim.value=sample.queries[index][1];render();}
+function setSample(index){
+  const customNotes=notes.value.trim()!==""&&notes.value!==sample.source;
+  const customClaim=claim.value.trim()!==""&&!sample.queries.some(([,text])=>text===claim.value);
+  if((customNotes||customClaim)&&!window.confirm("Replace your current notes and quiz claim with the example?"))return;
+  notes.value=sample.source;claim.value=sample.queries[index][1];render();
+}
 sample.queries.forEach(([label],index)=>{const b=el("button","",label);b.onclick=()=>setSample(index);document.querySelector("#examples").append(b);});
 document.querySelector("#reset").onclick=()=>setSample(0);
 document.querySelector("#find").onclick=render;notes.oninput=clearResult;claim.oninput=clearResult;

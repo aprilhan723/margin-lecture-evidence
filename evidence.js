@@ -27,13 +27,13 @@
     return spans;
   }
   function quantities(text) {
-    const regex = /(?<![\w.])(\d+(?:\.\d+)?)\s*(milliseconds?|seconds?|minutes?|hours?|volts?|watts?|degrees?|ms\b|s\b|v\b|w\b|%)/gi;
+    const regex = /(?<![\w.])([+−-]?(?:\d+(?:\.\d+)?|\.\d+))\s*((?:milliseconds?|seconds?|minutes?|hours?|volts?|watts?|degrees?|ms|s|v|w)\b|%)/gi;
     const units = {ms: ["s", .001], millisecond:["s",.001], s:["s",1], second:["s",1], minute:["s",60], hour:["s",3600], volt:["v",1], v:["v",1], watt:["w",1], w:["w",1], degree:["degree",1], "%":["%",1]};
     return Array.from(text.matchAll(regex), hit => {
       const raw = hit[2].toLowerCase();
       const key = units[raw] ? raw : raw.replace(/s$/, "");
       const [dimension, factor] = units[key];
-      return [dimension, Number(hit[1])*factor];
+      return [dimension, Number(hit[1].replace("−", "-"))*factor];
     });
   }
   function conflicts(query, text, q, d) {

@@ -32,7 +32,12 @@ function render(){
   }
   statusEl.textContent=match.rows.length+" passage"+(match.rows.length===1?"":"s")+" found.";
 }
-function setSample(index){notes.value=sample.source;claim.value=sample.queries[index][1];render();}
+function setSample(index){
+  const customNotes=notes.value.trim()!==""&&notes.value!==sample.source;
+  const customClaim=claim.value.trim()!==""&&!sample.queries.some(([,text])=>text===claim.value);
+  if((customNotes||customClaim)&&!window.confirm("Replace your current notes and quiz claim with the example?"))return;
+  notes.value=sample.source;claim.value=sample.queries[index][1];render();
+}
 sample.queries.forEach(([label],index)=>{const b=el("button","",label);b.onclick=()=>setSample(index);document.querySelector("#examples").append(b);});
 document.querySelector("#reset").onclick=()=>setSample(0);
 document.querySelector("#find").onclick=render;notes.oninput=clearResult;claim.oninput=clearResult;
